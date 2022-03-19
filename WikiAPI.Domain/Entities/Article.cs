@@ -9,7 +9,7 @@ namespace WikiAPI.Domain.Entities
 {
     public class Article: AuditEntity
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public string Title { get; set; }
         public string Slug { get; set; }
         public int Version { get; set; }

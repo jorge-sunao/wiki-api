@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace WikiAPI.Application.Features.Articles.Commands.CreateArticle
 {
-    public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand, Guid>
+    public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand, int>
     {
         private readonly IArticleRepository _articleRepository;
         private readonly IMapper _mapper;
@@ -20,7 +20,7 @@ namespace WikiAPI.Application.Features.Articles.Commands.CreateArticle
             _articleRepository = articleRepository;
         }
 
-        public async Task<Guid> Handle(CreateArticleCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(CreateArticleCommand request, CancellationToken cancellationToken)
         {
             var validator = new CreateArticleCommandValidator(_articleRepository);
             var validationResult = await validator.ValidateAsync(request);
@@ -30,9 +30,9 @@ namespace WikiAPI.Application.Features.Articles.Commands.CreateArticle
 
             var article = _mapper.Map<Article>(request);
 
-            article = await _articleRepository.AddAsync(article);
+            var articleId = await _articleRepository.AddAsync(article);
 
-            return article.Id;
+            return articleId;
         }
     }
 }

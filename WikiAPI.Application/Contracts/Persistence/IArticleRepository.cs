@@ -9,8 +9,8 @@ namespace WikiAPI.Application.Contracts.Persistence
 {
     public interface IArticleRepository:IAsyncRepository<Article>
     {
-        Task<List<Article>> GetArticlesWithSources(Guid articleId);
-        Task<bool> IsArticleTitleAndAuthorUnique(string title, string author, Guid? excludeId);
-        Task<bool> IsSlugUnique(string slug, Guid? excludeId);
+        Task<List<Article>> GetArticlesWithSources(int articleId);
+        Task<bool> IsArticleTitleAndAuthorUnique(string title, string author, int? excludeId);
+        Task<bool> IsSlugUnique(string slug, int? excludeId);
     }
 }

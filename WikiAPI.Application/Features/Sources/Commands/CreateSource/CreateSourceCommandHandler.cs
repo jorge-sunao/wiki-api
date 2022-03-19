@@ -39,7 +39,8 @@ namespace WikiAPI.Application.Features.Sources.Commands.CreateSource
             if (createSourceCommandResponse.Success)
             {
                 var source = _mapper.Map<Source>(request);
-                source = await _sourceRepository.AddAsync(source);
+                var sourceId = await _sourceRepository.AddAsync(source);
+                source.Id = sourceId;
 
                 createSourceCommandResponse.Source = _mapper.Map<CreateSourceDto>(source);
             }
