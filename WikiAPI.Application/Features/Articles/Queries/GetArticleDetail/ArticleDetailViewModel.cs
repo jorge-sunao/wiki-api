@@ -4,7 +4,7 @@ namespace WikiAPI.Application.Features.Articles.Queries.GetArticleDetail
 {
     public class ArticleDetailViewModel
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public string Title { get; set; }
         public string Slug { get; set; }
         public int Version { get; set; }

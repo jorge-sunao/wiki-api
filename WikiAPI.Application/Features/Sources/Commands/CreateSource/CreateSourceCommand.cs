@@ -5,7 +5,6 @@ namespace WikiAPI.Application.Features.Sources.Commands.CreateSource
 {
     public class CreateSourceCommand: IRequest<CreateSourceCommandResponse>
     {
-        //public SourceType Tyoe { get; set; }
         public string Author { get; set; }
         public string Title { get; set; }
         public int Year { get; set; }

@@ -4,8 +4,7 @@ namespace WikiAPI.Application.Features.Articles.Queries.GetArticleDetail
 {
     public class SourceDto
     {
-        public Guid Id { get; set; }
-        //public SourceType Tyoe { get; set; }
+        public int Id { get; set; }
         public string Author { get; set; }
         public string Title { get; set; }
         public int Year { get; set; }

@@ -5,6 +5,6 @@ namespace WikiAPI.Application.Features.Articles.Commands.DeleteArticle
 {
     public class DeleteArticleCommand: IRequest
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
     }
 }
