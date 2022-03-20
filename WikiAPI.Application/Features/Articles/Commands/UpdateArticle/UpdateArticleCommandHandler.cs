@@ -5,23 +5,27 @@ using WikiAPI.Domain.Entities;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
+using WikiAPI.Application.Common.Dtos;
 
-namespace WikiAPI.Application.Features.Articles.Commands.UpdateArticle
+namespace WikiAPI.Application.Features.Articles.Commands.UpdateArticle;
+
+public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand, UpdateArticleCommandResponse>
 {
-    public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand>
+    private readonly IArticleRepository _articleRepository;
+    private readonly IMapper _mapper;
+
+    public UpdateArticleCommandHandler(IMapper mapper, IArticleRepository articleRepository)
     {
-        private readonly IArticleRepository _articleRepository;
-        private readonly IMapper _mapper;
+        _mapper = mapper;
+        _articleRepository = articleRepository;
+    }
 
-        public UpdateArticleCommandHandler(IMapper mapper, IArticleRepository articleRepository)
+    public async Task<UpdateArticleCommandResponse> Handle(UpdateArticleCommand request, CancellationToken cancellationToken)
+    {
+        var updateArticleResponse = new UpdateArticleCommandResponse();
+
+        try
         {
-            _mapper = mapper;
-            _articleRepository = articleRepository;
-        }
-
-        public async Task<Unit> Handle(UpdateArticleCommand request, CancellationToken cancellationToken)
-        {
-
             var articleToUpdate = await _articleRepository.GetByIdAsync(request.Id);
 
             if (articleToUpdate == null)
@@ -37,9 +41,29 @@ namespace WikiAPI.Application.Features.Articles.Commands.UpdateArticle
 
             _mapper.Map(request, articleToUpdate, typeof(UpdateArticleCommand), typeof(Article));
 
+            articleToUpdate.Version += 1;
+
             await _articleRepository.UpdateAsync(articleToUpdate);
 
-            return Unit.Value;
+            updateArticleResponse.Article = _mapper.Map<ArticleDto>(articleToUpdate);
+
+            return updateArticleResponse;
+        }
+        catch (ValidationException ex)
+        {
+            updateArticleResponse.Success = false;
+            updateArticleResponse.ValidationErrors = new List<string>();
+            updateArticleResponse.ValidationErrors.AddRange(ex.ValidationErrors);
+
+            return updateArticleResponse;
+        }
+        catch (Exception ex)
+        {
+            updateArticleResponse.Success = false;
+            updateArticleResponse.ValidationErrors = new List<string>();
+            updateArticleResponse.ValidationErrors.Add(ex.Message);
+
+            return updateArticleResponse;
         }
     }
 }

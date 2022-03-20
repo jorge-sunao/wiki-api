@@ -1,10 +1,9 @@
 ﻿using MediatR;
 using System;
 
-namespace WikiAPI.Application.Features.Sources.Queries.GetSourceDetail
+namespace WikiAPI.Application.Features.Sources.Queries.GetSourceDetail;
+
+public class GetSourceDetailQuery: IRequest<GetSourceDetailQueryResponse>
 {
-    public class GetSourceDetailQuery: IRequest<SourceDetailViewModel>
-    {
-        public int Id { get; set; }
-    }
+    public int Id { get; set; }
 }

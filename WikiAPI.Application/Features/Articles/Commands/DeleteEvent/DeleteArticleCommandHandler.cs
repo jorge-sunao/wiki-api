@@ -6,20 +6,24 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WikiAPI.Application.Features.Articles.Commands.DeleteArticle
-{
-    public class DeleteArticleCommandHandler : IRequestHandler<DeleteArticleCommand>
-    {
-        private readonly IAsyncRepository<Article> _articleRepository;
-        private readonly IMapper _mapper;
-        
-        public DeleteArticleCommandHandler(IMapper mapper, IAsyncRepository<Article> articleRepository)
-        {
-            _mapper = mapper;
-            _articleRepository = articleRepository;
-        }
+namespace WikiAPI.Application.Features.Articles.Commands.DeleteArticle;
 
-        public async Task<Unit> Handle(DeleteArticleCommand request, CancellationToken cancellationToken)
+public class DeleteArticleCommandHandler : IRequestHandler<DeleteArticleCommand, DeleteArticleCommandResponse>
+{
+    private readonly IAsyncRepository<Article> _articleRepository;
+    private readonly IMapper _mapper;
+    
+    public DeleteArticleCommandHandler(IMapper mapper, IAsyncRepository<Article> articleRepository)
+    {
+        _mapper = mapper;
+        _articleRepository = articleRepository;
+    }
+
+    public async Task<DeleteArticleCommandResponse> Handle(DeleteArticleCommand request, CancellationToken cancellationToken)
+    {
+        var deleteArticleResponse = new DeleteArticleCommandResponse();
+
+        try
         {
             var eventToDelete = await _articleRepository.GetByIdAsync(request.Id);
 
@@ -30,7 +34,15 @@ namespace WikiAPI.Application.Features.Articles.Commands.DeleteArticle
 
             await _articleRepository.DeleteAsync(eventToDelete);
 
-            return Unit.Value;
+            return deleteArticleResponse;
+        }
+        catch (Exception ex)
+        {
+            deleteArticleResponse.Success = false;
+            deleteArticleResponse.ValidationErrors = new List<string>();
+            deleteArticleResponse.ValidationErrors.Add(ex.Message);
+
+            return deleteArticleResponse;
         }
     }
 }

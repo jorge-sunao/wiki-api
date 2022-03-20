@@ -2,20 +2,19 @@
 using System;
 using System.Collections.Generic;
 
-namespace WikiAPI.Application.Exceptions
+namespace WikiAPI.Application.Exceptions;
+
+public class ValidationException : ApplicationException
 {
-    public class ValidationException : ApplicationException
+    public List<string> ValidationErrors { get; set; }
+
+    public ValidationException(ValidationResult validationResult)
     {
-        public List<string> ValidationErrors { get; set; }
+        ValidationErrors = new List<string>();
 
-        public ValidationException(ValidationResult validationResult)
+        foreach (var validationError in validationResult.Errors)
         {
-            ValidationErrors = new List<string>();
-
-            foreach (var validationError in validationResult.Errors)
-            {
-                ValidationErrors.Add(validationError.ErrorMessage);
-            }
+            ValidationErrors.Add(validationError.ErrorMessage);
         }
     }
 }

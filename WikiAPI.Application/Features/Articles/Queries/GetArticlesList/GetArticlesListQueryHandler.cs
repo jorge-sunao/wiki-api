@@ -1,30 +1,40 @@
 ﻿using AutoMapper;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WikiAPI.Application.Contracts.Persistence;
 using WikiAPI.Domain.Entities;
 
-namespace WikiAPI.Application.Features.Articles.Queries.GetArticlesList
+namespace WikiAPI.Application.Features.Articles.Queries.GetArticlesList;
+
+public class GetArticlesListQueryHandler : IRequestHandler<GetArticlesListQuery, GetArticlesListQueryResponse>
 {
-    public class GetArticlesListQueryHandler : IRequestHandler<GetArticlesListQuery, List<ArticleListViewModel>>
+    private readonly IAsyncRepository<Article> _articleRepository;
+    private readonly IMapper _mapper;
+
+    public GetArticlesListQueryHandler(IMapper mapper, IAsyncRepository<Article> articleRepository)
     {
-        private readonly IAsyncRepository<Article> _articleRepository;
-        private readonly IMapper _mapper;
+        _mapper = mapper;
+        _articleRepository = articleRepository;
+    }
 
-        public GetArticlesListQueryHandler(IMapper mapper, IAsyncRepository<Article> articleRepository)
-        {
-            _mapper = mapper;
-            _articleRepository = articleRepository;
-        }
+    public async Task<GetArticlesListQueryResponse> Handle(GetArticlesListQuery request, CancellationToken cancellationToken)
+    {
+        var getArticlesListResponse = new GetArticlesListQueryResponse();
 
-        public async Task<List<ArticleListViewModel>> Handle(GetArticlesListQuery request, CancellationToken cancellationToken)
+        try
         {
             var allArticles = (await _articleRepository.ListAllAsync()).OrderByDescending(a => a.DatePublished);
-            return _mapper.Map<List<ArticleListViewModel>>(allArticles);
+            getArticlesListResponse.Articles = _mapper.Map<List<ArticleListViewModel>>(allArticles);
+
+            return getArticlesListResponse;
+        }
+        catch (Exception ex)
+        {
+            getArticlesListResponse.Success = false;
+            getArticlesListResponse.ValidationErrors = new List<string>();
+            getArticlesListResponse.ValidationErrors.Add(ex.Message);
+
+            return getArticlesListResponse;
         }
     }
 }

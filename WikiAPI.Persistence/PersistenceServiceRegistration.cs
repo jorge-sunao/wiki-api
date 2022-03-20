@@ -3,23 +3,27 @@ using WikiAPI.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using GloboTicket.TicketManagement.Persistence;
+using WikiAPI.Persistence.Connections;
+using Dapper.Contrib.Extensions;
 
-namespace WikiAPI.Persistence
+namespace WikiAPI.Persistence;
+
+public static class PersistenceServiceRegistration
 {
-    public static class PersistenceServiceRegistration
+    public static IServiceCollection AddPersistenceServices(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection AddPersistenceServices(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddDbContext<WikiAPIDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+        services.AddDbContext<WikiAPIDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddScoped(typeof(IAsyncRepository<>), typeof(BaseRepository<>));
+        services.AddScoped<IApplicationDbContext>(provider => provider.GetService<WikiAPIDbContext>());
+        services.AddScoped<IApplicationWriteDbConnection, WikiAPIWriteDbConnection>();
+        services.AddScoped<IApplicationReadDbConnection, WikiAPIReadDbConnection>();
 
-            services.AddScoped<IArticleRepository, ArticleRepository>();
-            services.AddScoped<ISourceRepository, SourceRepository>();
+        services.AddScoped(typeof(IAsyncRepository<>), typeof(BaseRepository<>));
 
-            return services;    
-        }
+        services.AddScoped<IArticleRepository, ArticleRepository>();
+        services.AddScoped<ISourceRepository, SourceRepository>();
+
+        return services;    
     }
 }
