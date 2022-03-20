@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 using System;
@@ -21,6 +22,7 @@ public class UpdateArticleTests
 {
     private readonly IMapper _mapper;
     private readonly Mock<IArticleRepository> _mockArticleRepository;
+    private readonly Mock<ILogger<UpdateArticleCommandHandler>> _mockLogger;
 
     public UpdateArticleTests()
     {
@@ -31,12 +33,14 @@ public class UpdateArticleTests
         });
 
         _mapper = configurationProvider.CreateMapper();
+
+        _mockLogger = new Mock<ILogger<UpdateArticleCommandHandler>>();
     }
 
     [Fact]
     public async Task Handle_ValidArticle_UpdatedToArticlesRepo()
     {
-        var handler = new UpdateArticleCommandHandler(_mapper, _mockArticleRepository.Object);
+        var handler = new UpdateArticleCommandHandler(_mapper, _mockArticleRepository.Object, _mockLogger.Object);
 
         await handler.Handle(new UpdateArticleCommand() {
             Id = 4,

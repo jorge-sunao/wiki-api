@@ -5,6 +5,7 @@ using WikiAPI.Domain.Entities;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace WikiAPI.Application.Features.Sources.Commands.DeleteSource;
 
@@ -12,11 +13,13 @@ public class DeleteSourceCommandHandler : IRequestHandler<DeleteSourceCommand, D
 {
     private readonly IAsyncRepository<Source> _sourceRepository;
     private readonly IMapper _mapper;
-    
-    public DeleteSourceCommandHandler(IMapper mapper, IAsyncRepository<Source> sourceRepository)
+    private readonly ILogger<DeleteSourceCommandHandler> _logger;
+
+    public DeleteSourceCommandHandler(IMapper mapper, IAsyncRepository<Source> sourceRepository, ILogger<DeleteSourceCommandHandler> logger)
     {
         _mapper = mapper;
         _sourceRepository = sourceRepository;
+        _logger = logger;
     }
 
     public async Task<DeleteSourceCommandResponse> Handle(DeleteSourceCommand request, CancellationToken cancellationToken)
@@ -38,11 +41,8 @@ public class DeleteSourceCommandHandler : IRequestHandler<DeleteSourceCommand, D
         }
         catch (Exception ex)
         {
-            deleteSourceResponse.Success = false;
-            deleteSourceResponse.ValidationErrors = new List<string>();
-            deleteSourceResponse.ValidationErrors.Add(ex.Message);
-
-            return deleteSourceResponse;
+            _logger.LogError($"Deleting source '{request.Id}' failed due to an error: {ex.Message}");
+            throw;
         }
     }
 }

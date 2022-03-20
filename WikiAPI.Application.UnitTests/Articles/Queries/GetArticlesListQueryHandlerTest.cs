@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 using System;
@@ -20,6 +21,7 @@ public class GetArticlesListQueryHandlerTest
 {
     private readonly IMapper _mapper;
     private readonly Mock<IArticleRepository> _mockCategoryRepository;
+    private readonly Mock<ILogger<GetArticlesListQueryHandler>> _mockLogger;
 
     public GetArticlesListQueryHandlerTest()
     {
@@ -30,12 +32,14 @@ public class GetArticlesListQueryHandlerTest
         });
 
         _mapper = configurationProvider.CreateMapper();
+
+        _mockLogger = new Mock<ILogger<GetArticlesListQueryHandler>>();
     }
 
     [Fact]
     public async Task GetArticlesListTest()
     {
-        var handler = new GetArticlesListQueryHandler(_mapper, _mockCategoryRepository.Object);
+        var handler = new GetArticlesListQueryHandler(_mapper, _mockCategoryRepository.Object, _mockLogger.Object);
 
         var result = await handler.Handle(new GetArticlesListQuery(), CancellationToken.None);
 

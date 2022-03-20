@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shouldly;
 using System;
@@ -21,6 +22,7 @@ public class DeleteArticleTests
 {
     private readonly IMapper _mapper;
     private readonly Mock<IArticleRepository> _mockArticleRepository;
+    private readonly Mock<ILogger<DeleteArticleCommandHandler>> _mockLogger;
 
     public DeleteArticleTests()
     {
@@ -31,12 +33,14 @@ public class DeleteArticleTests
         });
 
         _mapper = configurationProvider.CreateMapper();
+
+        _mockLogger = new Mock<ILogger<DeleteArticleCommandHandler>>();
     }
 
     [Fact]
     public async Task Handle_ValidArticle_DeletedArticlesRepo()
     {
-        var handler = new DeleteArticleCommandHandler(_mapper, _mockArticleRepository.Object);
+        var handler = new DeleteArticleCommandHandler(_mapper, _mockArticleRepository.Object, _mockLogger.Object);
 
         await handler.Handle(new DeleteArticleCommand() { Id = 4}, CancellationToken.None);
 

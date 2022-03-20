@@ -13,6 +13,7 @@ using WikiAPI.Application.Profiles;
 using WikiAPI.Application.UnitTests.Mocks;
 using WikiAPI.Domain.Entities;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace WikiAPI.Application.UnitTests.Articles.Commands;
 
@@ -20,6 +21,7 @@ public class CreateArticleTests
 {
     private readonly IMapper _mapper;
     private readonly Mock<IArticleRepository> _mockArticleRepository;
+    private readonly Mock<ILogger<CreateArticleCommandHandler>> _mockLogger;
 
     public CreateArticleTests()
     {
@@ -30,12 +32,14 @@ public class CreateArticleTests
         });
 
         _mapper = configurationProvider.CreateMapper();
+
+        _mockLogger = new Mock<ILogger<CreateArticleCommandHandler>>();
     }
 
     [Fact]
     public async Task Handle_ValidArticle_AddedToArticlesRepo()
     {
-        var handler = new CreateArticleCommandHandler(_mapper, _mockArticleRepository.Object);
+        var handler = new CreateArticleCommandHandler(_mapper, _mockArticleRepository.Object, _mockLogger.Object);
 
         await handler.Handle(new CreateArticleCommand() {
             Title = "Company II, The",

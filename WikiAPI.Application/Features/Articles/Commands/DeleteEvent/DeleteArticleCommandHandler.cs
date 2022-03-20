@@ -5,6 +5,7 @@ using WikiAPI.Domain.Entities;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace WikiAPI.Application.Features.Articles.Commands.DeleteArticle;
 
@@ -12,11 +13,13 @@ public class DeleteArticleCommandHandler : IRequestHandler<DeleteArticleCommand,
 {
     private readonly IAsyncRepository<Article> _articleRepository;
     private readonly IMapper _mapper;
-    
-    public DeleteArticleCommandHandler(IMapper mapper, IAsyncRepository<Article> articleRepository)
+    private readonly ILogger<DeleteArticleCommandHandler> _logger;
+
+    public DeleteArticleCommandHandler(IMapper mapper, IAsyncRepository<Article> articleRepository, ILogger<DeleteArticleCommandHandler> logger)
     {
         _mapper = mapper;
         _articleRepository = articleRepository;
+        _logger = logger;
     }
 
     public async Task<DeleteArticleCommandResponse> Handle(DeleteArticleCommand request, CancellationToken cancellationToken)
@@ -38,11 +41,9 @@ public class DeleteArticleCommandHandler : IRequestHandler<DeleteArticleCommand,
         }
         catch (Exception ex)
         {
-            deleteArticleResponse.Success = false;
-            deleteArticleResponse.ValidationErrors = new List<string>();
-            deleteArticleResponse.ValidationErrors.Add(ex.Message);
+            _logger.LogError($"Deleting article '{request.Id}' failed due to an error: {ex.Message}");
 
-            return deleteArticleResponse;
+            throw;
         }
     }
 }

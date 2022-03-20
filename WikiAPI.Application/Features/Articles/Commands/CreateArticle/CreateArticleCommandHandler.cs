@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WikiAPI.Application.Common.Dtos;
 using WikiAPI.Application.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace WikiAPI.Application.Features.Articles.Commands.CreateArticle;
 
@@ -14,12 +15,13 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
 {
     private readonly IArticleRepository _articleRepository;
     private readonly IMapper _mapper;
+    private readonly ILogger<CreateArticleCommandHandler> _logger;
 
-
-    public CreateArticleCommandHandler(IMapper mapper, IArticleRepository articleRepository)
+    public CreateArticleCommandHandler(IMapper mapper, IArticleRepository articleRepository, ILogger<CreateArticleCommandHandler> logger)
     {
         _mapper = mapper;
         _articleRepository = articleRepository;
+        _logger = logger;
     }
 
     public async Task<CreateArticleCommandResponse> Handle(CreateArticleCommand request, CancellationToken cancellationToken)
@@ -56,11 +58,9 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
         }
         catch (Exception ex)
         {
-            createArticleResponse.Success = false;
-            createArticleResponse.ValidationErrors = new List<string>();
-            createArticleResponse.ValidationErrors.Add(ex.Message);
+            _logger.LogError($"Creating article {request.Title} by {request.Author} failed due to an error: {ex.Message}");
 
-            return createArticleResponse;
+            throw;
         }
     }
 }

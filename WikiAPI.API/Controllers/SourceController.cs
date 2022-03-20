@@ -21,6 +21,7 @@ public class SourceController : BaseController
 
     [HttpGet("{id}", Name = "GetSourceById")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<GetSourceDetailQueryResponse>> GetSourceById(int id)
     {
         var getSourceDetailQuery = new GetSourceDetailQuery() { Id = id };
@@ -37,6 +38,7 @@ public class SourceController : BaseController
 
     [HttpPut(Name = "UpdateSource")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UpdateSourceCommandResponse>> Update([FromBody] UpdateSourceCommand updateSourceCommand)
     {
         var response = await _mediator.Send(updateSourceCommand);
@@ -45,6 +47,7 @@ public class SourceController : BaseController
 
     [HttpDelete("{id}", Name = "DeleteSource")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<DeleteSourceCommandResponse>> Delete(int id)
     {
         var deleteSourceCommand = new DeleteSourceCommand() { Id = id };
