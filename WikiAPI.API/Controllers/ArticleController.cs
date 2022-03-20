@@ -21,6 +21,7 @@ public class ArticleController : BaseController
 
     [HttpGet("{id}", Name = "GetArticleById")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<GetArticleDetailQueryResponse>> GetById(int id)
     {
         var getArticleDetailQuery = new GetArticleDetailQuery() { Id = id };
@@ -37,6 +38,7 @@ public class ArticleController : BaseController
 
     [HttpPut(Name = "UpdateArticle")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UpdateArticleCommandResponse>> Update([FromBody] UpdateArticleCommand updateArticleCommand)
     {
         var response = await _mediator.Send(updateArticleCommand);
@@ -45,6 +47,7 @@ public class ArticleController : BaseController
 
     [HttpDelete("{id}", Name = "DeleteArticle")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<DeleteArticleCommandResponse>> Delete(int id)
     {
         var deleteArticleCommand = new DeleteArticleCommand() { Id = id };

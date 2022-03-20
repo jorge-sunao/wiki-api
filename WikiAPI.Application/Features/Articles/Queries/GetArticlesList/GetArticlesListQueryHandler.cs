@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using WikiAPI.Application.Contracts.Persistence;
 using WikiAPI.Domain.Entities;
@@ -10,11 +11,13 @@ public class GetArticlesListQueryHandler : IRequestHandler<GetArticlesListQuery,
 {
     private readonly IAsyncRepository<Article> _articleRepository;
     private readonly IMapper _mapper;
+    private readonly ILogger<GetArticlesListQueryHandler> _logger;
 
-    public GetArticlesListQueryHandler(IMapper mapper, IAsyncRepository<Article> articleRepository)
+    public GetArticlesListQueryHandler(IMapper mapper, IAsyncRepository<Article> articleRepository, ILogger<GetArticlesListQueryHandler> logger)
     {
         _mapper = mapper;
         _articleRepository = articleRepository;
+        _logger = logger;
     }
 
     public async Task<GetArticlesListQueryResponse> Handle(GetArticlesListQuery request, CancellationToken cancellationToken)
@@ -30,11 +33,9 @@ public class GetArticlesListQueryHandler : IRequestHandler<GetArticlesListQuery,
         }
         catch (Exception ex)
         {
-            getArticlesListResponse.Success = false;
-            getArticlesListResponse.ValidationErrors = new List<string>();
-            getArticlesListResponse.ValidationErrors.Add(ex.Message);
+            _logger.LogError($"Getting list of articles failed due to an error: {ex.Message}");
 
-            return getArticlesListResponse;
+            throw;
         }
     }
 }

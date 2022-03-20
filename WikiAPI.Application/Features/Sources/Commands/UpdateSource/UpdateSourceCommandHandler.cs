@@ -6,6 +6,7 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 using WikiAPI.Application.Common.Dtos;
+using Microsoft.Extensions.Logging;
 
 namespace WikiAPI.Application.Features.Sources.Commands.UpdateSource;
 
@@ -13,11 +14,13 @@ public class UpdateSourceCommandHandler : IRequestHandler<UpdateSourceCommand, U
 {
     private readonly ISourceRepository _sourceRepository;
     private readonly IMapper _mapper;
+    private readonly ILogger<UpdateSourceCommandHandler> _logger;
 
-    public UpdateSourceCommandHandler(IMapper mapper, ISourceRepository sourceRepository)
+    public UpdateSourceCommandHandler(IMapper mapper, ISourceRepository sourceRepository, ILogger<UpdateSourceCommandHandler> logger)
     {
         _mapper = mapper;
         _sourceRepository = sourceRepository;
+        _logger = logger;
     }
 
     public async Task<UpdateSourceCommandResponse> Handle(UpdateSourceCommand request, CancellationToken cancellationToken)
@@ -57,11 +60,8 @@ public class UpdateSourceCommandHandler : IRequestHandler<UpdateSourceCommand, U
         }
         catch (Exception ex)
         {
-            updateSourceResponse.Success = false;
-            updateSourceResponse.ValidationErrors = new List<string>();
-            updateSourceResponse.ValidationErrors.Add(ex.Message);
-
-            return updateSourceResponse;
+            _logger.LogError($"Updating source '{request.Id}' failed due to an error: {ex.Message}");
+            throw;
         }
     }
 }

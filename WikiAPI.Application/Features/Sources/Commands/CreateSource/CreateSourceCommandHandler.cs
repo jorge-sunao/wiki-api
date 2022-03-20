@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WikiAPI.Application.Common.Dtos;
 using WikiAPI.Application.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace WikiAPI.Application.Features.Sources.Commands.CreateSource;
 
@@ -14,12 +15,13 @@ public class CreateSourceCommandHandler : IRequestHandler<CreateSourceCommand, C
 {
     private readonly IAsyncRepository<Source> _sourceRepository;
     private readonly IMapper _mapper;
+    private readonly ILogger<CreateSourceCommandHandler> _logger;
 
-
-    public CreateSourceCommandHandler(IMapper mapper, IAsyncRepository<Source> sourceRepository)
+    public CreateSourceCommandHandler(IMapper mapper, IAsyncRepository<Source> sourceRepository, ILogger<CreateSourceCommandHandler> logger)
     {
         _mapper = mapper;
         _sourceRepository = sourceRepository;
+        _logger = logger;
     }
 
     public async Task<CreateSourceCommandResponse> Handle(CreateSourceCommand request, CancellationToken cancellationToken)
@@ -52,11 +54,8 @@ public class CreateSourceCommandHandler : IRequestHandler<CreateSourceCommand, C
         }
         catch (Exception ex)
         {
-            createSourceCommandResponse.Success = false;
-            createSourceCommandResponse.ValidationErrors = new List<string>();
-            createSourceCommandResponse.ValidationErrors.Add(ex.Message);
-
-            return createSourceCommandResponse;
+            _logger.LogError($"Creating source {request.Title} by {request.Author} failed due to an error: {ex.Message}");
+            throw;
         }
     }
 }

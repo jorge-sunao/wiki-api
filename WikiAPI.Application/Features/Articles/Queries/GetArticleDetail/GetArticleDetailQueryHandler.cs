@@ -6,6 +6,7 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 using WikiAPI.Application.Common.Dtos;
+using Microsoft.Extensions.Logging;
 
 namespace WikiAPI.Application.Features.Articles.Queries.GetArticleDetail;
 
@@ -13,11 +14,13 @@ public class GetArticleDetailQueryHandler : IRequestHandler<GetArticleDetailQuer
 {
     private readonly IArticleRepository _articleRepository;
     private readonly IMapper _mapper;
+    private readonly ILogger<GetArticleDetailQueryHandler> _logger;
 
-    public GetArticleDetailQueryHandler(IMapper mapper, IArticleRepository articleRepository)
+    public GetArticleDetailQueryHandler(IMapper mapper, IArticleRepository articleRepository, ILogger<GetArticleDetailQueryHandler> logger)
     {
         _mapper = mapper;
         _articleRepository = articleRepository;
+        _logger = logger;
     }
 
     public async Task<GetArticleDetailQueryResponse> Handle(GetArticleDetailQuery request, CancellationToken cancellationToken)
@@ -41,11 +44,9 @@ public class GetArticleDetailQueryHandler : IRequestHandler<GetArticleDetailQuer
         }
         catch (Exception ex)
         {
-            getArticleResponse.Success = false;
-            getArticleResponse.ValidationErrors = new List<string>();
-            getArticleResponse.ValidationErrors.Add(ex.Message);
+            _logger.LogError($"Getting article detail '{request.Id}' failed due to an error: {ex.Message}");
 
-            return getArticleResponse;
+            throw;
         }
     }
 }

@@ -6,8 +6,14 @@ using Microsoft.OpenApi.Models;
 using WikiAPI.Infrastructure;
 using WikiAPI.Application.Contracts.Persistence;
 using WikiAPI.Application.Contracts.Infrastructure;
+using WikiAPI.Api.Middleware;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(builder.Configuration)
+    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day));
 
 // Add services to the container.
 
@@ -29,6 +35,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+
+app.Logger.LogInformation("Public Api App created");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -53,12 +61,14 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "WikiAPI V1");
 });
 
+app.UseCustomExceptionHandler();
+
 app.UseEndpoints(endpoints =>
 {
     app.MapControllers();
 });
 
-// Seeding Database
+app.Logger.LogInformation("Seeding Database");
 using (var scope = app.Services.CreateScope())
 {
     var scopedProvider = scope.ServiceProvider;
@@ -73,7 +83,10 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         Console.WriteLine($"An error occurred seeding the DB. Exception: {ex.Message}");
+        app.Logger.LogError(ex, "An error occurred seeding the DB.");
     }
 }
+
+app.Logger.LogInformation("Launching API");
 
 app.Run();

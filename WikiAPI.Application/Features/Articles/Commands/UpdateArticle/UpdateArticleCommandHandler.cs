@@ -6,6 +6,7 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 using WikiAPI.Application.Common.Dtos;
+using Microsoft.Extensions.Logging;
 
 namespace WikiAPI.Application.Features.Articles.Commands.UpdateArticle;
 
@@ -13,11 +14,13 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
 {
     private readonly IArticleRepository _articleRepository;
     private readonly IMapper _mapper;
+    private readonly ILogger<UpdateArticleCommandHandler> _logger;
 
-    public UpdateArticleCommandHandler(IMapper mapper, IArticleRepository articleRepository)
+    public UpdateArticleCommandHandler(IMapper mapper, IArticleRepository articleRepository, ILogger<UpdateArticleCommandHandler> logger)
     {
         _mapper = mapper;
         _articleRepository = articleRepository;
+        _logger = logger;
     }
 
     public async Task<UpdateArticleCommandResponse> Handle(UpdateArticleCommand request, CancellationToken cancellationToken)
@@ -59,11 +62,9 @@ public class UpdateArticleCommandHandler : IRequestHandler<UpdateArticleCommand,
         }
         catch (Exception ex)
         {
-            updateArticleResponse.Success = false;
-            updateArticleResponse.ValidationErrors = new List<string>();
-            updateArticleResponse.ValidationErrors.Add(ex.Message);
+            _logger.LogError($"Updating article '{request.Id}' failed due to an error: {ex.Message}");
 
-            return updateArticleResponse;
+            throw;
         }
     }
 }
