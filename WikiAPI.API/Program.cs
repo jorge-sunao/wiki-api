@@ -34,6 +34,11 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddStackExchangeRedisCache(options => {
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "localRedis_wikiapirediscache";
+});
+
 var app = builder.Build();
 
 app.Logger.LogInformation("Public Api App created");

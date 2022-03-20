@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
+using WikiAPI.Application.Extensions;
 using WikiAPI.Application.Features.Articles.Commands.CreateArticle;
 using WikiAPI.Application.Features.Articles.Commands.DeleteArticle;
 using WikiAPI.Application.Features.Articles.Commands.UpdateArticle;
@@ -11,21 +13,44 @@ namespace WikiAPI.API.Controllers;
 [Route("api/Articles")]
 public class ArticleController : BaseController
 {
+    private readonly IDistributedCache _cache;
+
+    public ArticleController(IDistributedCache cache)
+    {
+        _cache = cache;
+    }
+
     [HttpGet(Name = "GetListOfArticles")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ResponseCache(NoStore = false, Location = ResponseCacheLocation.Any, Duration = 30)]
     public async Task<ActionResult<GetArticlesListQueryResponse>> GetList()
     {
-        var response = await _mediator.Send(new GetArticlesListQuery());
+        var cacheKey = "GET_ALL_ARTICLES";
+        var response = await _cache.GetRecordAsync<GetArticlesListQueryResponse>(cacheKey);
+        if (response is null)
+        {
+            response = await _mediator.Send(new GetArticlesListQuery());
+            await _cache.SetRecordAsync(cacheKey, response);
+        }
         return Ok(response);
     }
 
     [HttpGet("{id}", Name = "GetArticleById")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ResponseCache(NoStore = false, Location = ResponseCacheLocation.Any, Duration = 30)]
     public async Task<ActionResult<GetArticleDetailQueryResponse>> GetById(int id)
     {
+        var cacheKey = $"GET_ARTICLE_{id}";
         var getArticleDetailQuery = new GetArticleDetailQuery() { Id = id };
-        return Ok(await _mediator.Send(getArticleDetailQuery));
+
+        var response = await _cache.GetRecordAsync<GetArticleDetailQueryResponse>(cacheKey);
+        if (response is null)
+        {
+            response = await _mediator.Send(getArticleDetailQuery);
+            await _cache.SetRecordAsync(cacheKey, response);
+        }
+        return Ok(response);
     }
 
     [HttpPost(Name = "AddArticle")]
