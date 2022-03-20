@@ -7,23 +7,37 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WikiAPI.Application.Features.Sources.Queries.GetSourcesList
+namespace WikiAPI.Application.Features.Sources.Queries.GetSourcesList;
+
+public class GetSourcesListQueryHandler : IRequestHandler<GetSourcesListQuery, GetSourcesListQueryResponse>
 {
-    public class GetSourcesListQueryHandler : IRequestHandler<GetSourcesListQuery, List<SourceListViewModel>>
+    private readonly IAsyncRepository<Source> _sourceRepository;
+    private readonly IMapper _mapper;
+
+    public GetSourcesListQueryHandler(IMapper mapper, IAsyncRepository<Source> sourceRepository)
     {
-        private readonly IAsyncRepository<Source> _sourceRepository;
-        private readonly IMapper _mapper;
+        _mapper = mapper;
+        _sourceRepository = sourceRepository;
+    }
 
-        public GetSourcesListQueryHandler(IMapper mapper, IAsyncRepository<Source> sourceRepository)
-        {
-            _mapper = mapper;
-            _sourceRepository = sourceRepository;
-        }
+    public async Task<GetSourcesListQueryResponse> Handle(GetSourcesListQuery request, CancellationToken cancellationToken)
+    {
+        var getSourcesListResponse = new GetSourcesListQueryResponse();
 
-        public async Task<List<SourceListViewModel>> Handle(GetSourcesListQuery request, CancellationToken cancellationToken)
+        try
         {
             var allSources = (await _sourceRepository.ListAllAsync()).OrderBy(x => x.Author);
-            return _mapper.Map<List<SourceListViewModel>>(allSources);
+            getSourcesListResponse.Sources = _mapper.Map<List<SourceListViewModel>>(allSources);
+
+            return getSourcesListResponse;
+        }
+        catch (Exception ex)
+        {
+            getSourcesListResponse.Success = false;
+            getSourcesListResponse.ValidationErrors = new List<string>();
+            getSourcesListResponse.ValidationErrors.Add(ex.Message);
+
+            return getSourcesListResponse;
         }
     }
 }

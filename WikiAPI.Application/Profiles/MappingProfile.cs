@@ -4,27 +4,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WikiAPI.Application.Common.Dtos;
 using WikiAPI.Application.Features.Articles.Commands.CreateArticle;
 using WikiAPI.Application.Features.Articles.Commands.UpdateArticle;
 using WikiAPI.Application.Features.Articles.Queries.GetArticleDetail;
 using WikiAPI.Application.Features.Articles.Queries.GetArticlesList;
+using WikiAPI.Application.Features.Sources.Commands.CreateSource;
+using WikiAPI.Application.Features.Sources.Commands.UpdateSource;
 using WikiAPI.Application.Features.Sources.Queries.GetSourceDetail;
 using WikiAPI.Application.Features.Sources.Queries.GetSourcesList;
 using WikiAPI.Domain.Entities;
 
-namespace WikiAPI.Application.Profiles
+namespace WikiAPI.Application.Profiles;
+
+public class MappingProfile : Profile
 {
-    public class MappingProfile : Profile
+    public MappingProfile()
     {
-        public MappingProfile()
-        {
-            CreateMap<Article, ArticleListViewModel>().ReverseMap();
-            CreateMap<Article, ArticleDetailViewModel>().ReverseMap();
-            CreateMap<Article, CreateArticleCommand>().ReverseMap();
-            CreateMap<Article, UpdateArticleCommand>().ReverseMap();
-            CreateMap<Source, SourceDto>();
-            CreateMap<Source, SourceListViewModel>().ReverseMap();
-            CreateMap<Source, SourceDetailViewModel>().ReverseMap();
-        }
+        CreateMap<Article, ArticleListViewModel>().ReverseMap();
+        CreateMap<Article, ArticleDetailViewModel>().ReverseMap();
+        CreateMap<Article, CreateArticleCommand>().ReverseMap();
+        CreateMap<Article, UpdateArticleCommand>().ReverseMap();
+        CreateMap<Article, ArticleDto>();
+        CreateMap<Source, SourceDto>();
+        CreateMap<Source, SourceListViewModel>().ReverseMap();
+        CreateMap<Source, SourceDetailViewModel>().ReverseMap();
+        CreateMap<Source, CreateSourceCommand>().ReverseMap();
+        CreateMap<Source, UpdateSourceCommand>().ReverseMap();
     }
 }

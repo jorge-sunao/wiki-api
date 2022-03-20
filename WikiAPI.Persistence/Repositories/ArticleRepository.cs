@@ -6,48 +6,66 @@ using System.Threading.Tasks;
 using WikiAPI.Application.Contracts.Persistence;
 using WikiAPI.Domain.Entities;
 
-namespace WikiAPI.Persistence.Repositories
+namespace WikiAPI.Persistence.Repositories;
+
+public class ArticleRepository : BaseRepository<Article>, IArticleRepository
 {
-    public class ArticleRepository : BaseRepository<Article>, IArticleRepository
+    private IApplicationReadDbConnection _readDbConnection;
+    private IApplicationWriteDbConnection _writeDbConnection;
+
+    public ArticleRepository(IApplicationDbContext dbContext, IApplicationReadDbConnection readDbConnection, IApplicationWriteDbConnection writeDbConnection) : base(dbContext)
+    {        
+        _readDbConnection = readDbConnection;
+        _writeDbConnection = writeDbConnection;
+    }
+
+    public async Task<Article> GetArticleWithSources(int articleId)
     {
-        private IApplicationDbContext _dbContext;
-        private IApplicationReadDbConnection _readDbConnection;
-        private IApplicationWriteDbConnection _writeDbConnection;
+        var query = "select * from Articles left outer join Sources on(Sources.ArticleId = Articles.Id) where Articles.Id = @articleId";
 
-        public ArticleRepository(IApplicationDbContext dbContext, IApplicationReadDbConnection readDbConnection, IApplicationWriteDbConnection writeDbConnection) : base(dbContext)
+        var articleDic = new Dictionary<int, Article>();
+
+        var articles = await _readDbConnection.QueryAsync<Article, Source, Article>(query, (article, source) =>
         {
-            _dbContext = dbContext;
-            _readDbConnection = readDbConnection;
-            _writeDbConnection = writeDbConnection;
-        }
+            if (!articleDic.TryGetValue(article.Id, out var currentArticle))
+            {
+                currentArticle = article;
 
-        public Task<List<Article>> GetArticlesWithSources(int articleId)
-        {
-            throw new NotImplementedException();
-        }
+                if (currentArticle.Sources == null)
+                    currentArticle.Sources = new List<Source>();
+                
+                articleDic.Add(currentArticle.Id, currentArticle);
+            }
 
-        public async Task<bool> IsArticleTitleAndAuthorUnique(string title, string author, int? excludeId)
-        {
-            var query = $"select count(*) from Article where Title = @title and Author = @author";
+            if (source != null)
+                currentArticle.Sources.Add(source);
 
-            if (excludeId != null && excludeId > 0)
-                query += $" and Id <> {excludeId}";
+            return currentArticle;
+        }, new { articleId });
+        return articles.Distinct().FirstOrDefault();
+    }
 
-            var resultCount = await _readDbConnection.QueryFirstOrDefaultAsync<int>(query, new { title, author });
+    public async Task<bool> IsArticleTitleAndAuthorUnique(string title, string author, int? excludeId)
+    {
+        var query = $"select count(*) from Articles where Title = @title and Author = @author";
 
-            return resultCount == 0;
-        }
+        if (excludeId != null && excludeId > 0)
+            query += $" and Id <> {excludeId}";
 
-        public async Task<bool> IsSlugUnique(string slug, int? excludeId)
-        {
-            var query = $"select count(*) from Article where Slug = @slug";
+        var resultCount = await _readDbConnection.QueryFirstOrDefaultAsync<int>(query, new { title, author });
 
-            if (excludeId != null && excludeId > 0)
-                query += $" and Id <> {excludeId}";
+        return resultCount == 0;
+    }
 
-            var resultCount = await _readDbConnection.QueryFirstOrDefaultAsync<int>(query, new { slug });
+    public async Task<bool> IsSlugUnique(string slug, int? excludeId)
+    {
+        var query = $"select count(*) from Articles where Slug = @slug";
 
-            return resultCount == 0;
-        }
+        if (excludeId != null && excludeId > 0)
+            query += $" and Id <> {excludeId}";
+
+        var resultCount = await _readDbConnection.QueryFirstOrDefaultAsync<int>(query, new { slug });
+
+        return resultCount == 0;
     }
 }

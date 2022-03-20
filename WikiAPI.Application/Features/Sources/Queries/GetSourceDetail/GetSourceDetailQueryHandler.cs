@@ -6,25 +6,39 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WikiAPI.Application.Features.Sources.Queries.GetSourceDetail
+namespace WikiAPI.Application.Features.Sources.Queries.GetSourceDetail;
+
+public class GetSourceDetailQueryHandler : IRequestHandler<GetSourceDetailQuery, GetSourceDetailQueryResponse>
 {
-    public class GetSourceDetailQueryHandler : IRequestHandler<GetSourceDetailQuery, SourceDetailViewModel>
+    private readonly IAsyncRepository<Source> _sourceRepository;
+    private readonly IMapper _mapper;
+
+    public GetSourceDetailQueryHandler(IMapper mapper, IAsyncRepository<Source> sourceRepository)
     {
-        private readonly IAsyncRepository<Source> _sourceRepository;
-        private readonly IMapper _mapper;
+        _mapper = mapper;
+        _sourceRepository = sourceRepository;
+    }
 
-        public GetSourceDetailQueryHandler(IMapper mapper, IAsyncRepository<Source> sourceRepository)
-        {
-            _mapper = mapper;
-            _sourceRepository = sourceRepository;
-        }
+    public async Task<GetSourceDetailQueryResponse> Handle(GetSourceDetailQuery request, CancellationToken cancellationToken)
+    {
+        var getSourceResponse = new GetSourceDetailQueryResponse();
 
-        public async Task<SourceDetailViewModel> Handle(GetSourceDetailQuery request, CancellationToken cancellationToken)
+        try
         {
             var source = await _sourceRepository.GetByIdAsync(request.Id);
             var sourceDetailDto = _mapper.Map<SourceDetailViewModel>(source);
 
-            return sourceDetailDto;
+            getSourceResponse.Source = sourceDetailDto;
+
+            return getSourceResponse;
+        }
+        catch (Exception ex)
+        {
+            getSourceResponse.Success = false;
+            getSourceResponse.ValidationErrors = new List<string>();
+            getSourceResponse.ValidationErrors.Add(ex.Message);
+
+            return getSourceResponse;
         }
     }
 }

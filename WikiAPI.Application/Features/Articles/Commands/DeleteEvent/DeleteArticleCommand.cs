@@ -1,10 +1,9 @@
 ﻿using MediatR;
 using System;
 
-namespace WikiAPI.Application.Features.Articles.Commands.DeleteArticle
+namespace WikiAPI.Application.Features.Articles.Commands.DeleteArticle;
+
+public class DeleteArticleCommand: IRequest<DeleteArticleCommandResponse>
 {
-    public class DeleteArticleCommand: IRequest
-    {
-        public int Id { get; set; }
-    }
+    public int Id { get; set; }
 }

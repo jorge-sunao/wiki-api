@@ -4,19 +4,23 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace WikiAPI.Application.Features.Sources.Commands.CreateSource
-{
-    public class CreateSourceCommandValidator : AbstractValidator<CreateSourceCommand>
-    {
-        public CreateSourceCommandValidator()
-        {
-            RuleFor(p => p.Title)
-                .NotEmpty().WithMessage("{PropertyName} is required.")
-                .NotNull();
+namespace WikiAPI.Application.Features.Sources.Commands.CreateSource;
 
-            RuleFor(p => p.Author)
-                .NotEmpty().WithMessage("{PropertyName} is required.")
-                .NotNull();
-        }
+public class CreateSourceCommandValidator : AbstractValidator<CreateSourceCommand>
+{
+    public CreateSourceCommandValidator()
+    {
+        RuleFor(s => s.Title)
+            .NotEmpty().WithMessage("{PropertyName} is required.")
+            .MaximumLength(500).WithMessage("{PropertyName} must not exceed 500 characters.")
+            .NotNull();
+
+        RuleFor(s => s.Author)
+            .NotEmpty().WithMessage("{PropertyName} is required.")
+            .NotNull();
+        
+        RuleFor(s => s.ArticleId)
+            .NotEmpty().WithMessage("{PropertyName} is required.")
+            .NotNull();
     }
 }

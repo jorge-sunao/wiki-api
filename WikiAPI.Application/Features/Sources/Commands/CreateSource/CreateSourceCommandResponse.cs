@@ -1,14 +1,13 @@
-﻿using WikiAPI.Application.Responses;
+﻿using WikiAPI.Application.Common.Dtos;
+using WikiAPI.Application.Responses;
 
-namespace WikiAPI.Application.Features.Sources.Commands.CreateSource
+namespace WikiAPI.Application.Features.Sources.Commands.CreateSource;
+
+public class CreateSourceCommandResponse: BaseResponse
 {
-    public class CreateSourceCommandResponse: BaseResponse
+    public CreateSourceCommandResponse() : base()
     {
-        public CreateSourceCommandResponse() : base()
-        {
-
-        }
-
-        public CreateSourceDto Source { get; set; }
     }
+
+    public SourceDto Source { get; set; }
 }
