@@ -12,14 +12,12 @@ namespace WikiAPI.Application.Features.Articles.Queries.GetArticleDetail;
 public class GetArticleDetailQueryHandler : IRequestHandler<GetArticleDetailQuery, GetArticleDetailQueryResponse>
 {
     private readonly IArticleRepository _articleRepository;
-    private readonly IAsyncRepository<Source> _sourceRepository;
     private readonly IMapper _mapper;
 
-    public GetArticleDetailQueryHandler(IMapper mapper, IArticleRepository articleRepository, IAsyncRepository<Source> sourceRepository)
+    public GetArticleDetailQueryHandler(IMapper mapper, IArticleRepository articleRepository)
     {
         _mapper = mapper;
         _articleRepository = articleRepository;
-        _sourceRepository = sourceRepository;
     }
 
     public async Task<GetArticleDetailQueryResponse> Handle(GetArticleDetailQuery request, CancellationToken cancellationToken)
